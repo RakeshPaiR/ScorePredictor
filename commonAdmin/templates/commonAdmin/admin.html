@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Score Predictor</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+	<style type="text/css">
+		body {
+			background-image: url("https://previews.123rf.com/images/releon003/releon0031701/releon003170100017/69893854-football-field-soccer-ball-green-grass-stadium-background.jpg");
+			background-size: cover;
+			background-attachment: fixed;
+		}
+		.normBtn {
+			color: #fff !important;
+			background-color: #6c757d !important;
+			border-color: #6c757d !important;
+		}
+		.btnHover {
+			color: #fff !important;
+			background-color: #5a6268 !important;
+			border-color: #545b62 !important;
+		}
+	</style>
+	<script type="text/javascript">
+		function selectAll() {
+			var match = document.getElementsByName('match');
+			var i;
+			for (i = 0; i < match.length;i++) {
+				if (match[i].firstElementChild.checked == false) {
+					match[i].click();
+				}
+			}
+		}
+		function unSelectAll() {
+			var match = document.getElementsByName('match');
+			var i;
+			console.log(match)
+			for (i = 0; i < match.length;i++) {
+				if (match[i].firstElementChild.checked == true) {
+					match[i].click();
+				}
+			}
+		}
+		function clicking(source) {
+			if (source.firstElementChild.checked == false) {
+				source.firstElementChild.checked = true;
+			}
+			else {
+				source.firstElementChild.checked = false;
+			}
+		}
+				
+		
+	</script>
+	
+</head>
+<body>
+	<div>
+		<nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+			<a class="navbar-brand" href="">
+			<img src="https://media.istockphoto.com/photos/question-mark-gaming-balls-alphabet-picture-id150942995" width="30" height="30" class="d-inline-block align-top" alt="">
+			Sports Predictions
+			</a>
+			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse" id="navbarSupportedContent">
+				<ul class="navbar-nav mr-auto">
+					<li class="nav-item">
+						<a class="nav-link" href="{% url 'football:index' %}">Football <span class="sr-only">(current)</span></a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="#">Cricket</a>
+					</li>	
+				</ul>
+			</div>
+		</nav>
+	</div>
+	<div class="container main-content" style="margin-top: 5%">
+		<form class="form" method="POST" action="{% url 'commonAdmin:getMatches' %}" id="competitionForm">
+			{% csrf_token %}
+			<div class="row form-group">
+				<select class="form-control competionSelect" name="compCode" onchange="this.form.submit()">
+					<option value="" disabled="" selected="">Select Competition</option>
+					{% for competition in competitions %}
+					{% if code != null and competition.code == code %}
+					<option value="{{ competition.code }}" selected>{{ competition.name }}</option>
+					{% else %}
+					<option value="{{ competition.code }}">{{ competition.name }}</option>
+					{% endif %}
+					{% endfor %}
+				</select>
+			</div>
+		</form>
+		<form class="form" id="mainContent" method="POST" action="{% url 'commonAdmin:storeMatches' %}">
+			{% csrf_token %}	
+			{% if matches is not None %}
+			<div class="row">
+				{% for match in matches %}
+					{% if match.status == "SCHEDULED" %}
+					<div class="col-6 btn-group-toggle mb-1" data-toggle="button">
+						<label class="btn btn-secondary" style="width: 90%;" name="match" for="{{ match.id }}" onclick="clicking(this)">
+							<input type="checkbox" data-toggle="button" value="{{ match.id }}" autocomplete="off" id="{{ match.id }}" name="Match">
+							{{ match.homeTeam.name }} :: {{ match.awayTeam.name }}
+						</label>
+					</div>
+					{% endif %}
+				{% endfor %}
+			</div>
+			<div class="row">
+				<div class="col-4 btn-group-toggle mt-5">
+					<button type="button" class="btn btn-info" onclick="selectAll()" style="width: 90%">Select All</button>
+				</div>
+				<div class="col-4 btn-group-toggle mt-5 mb-5">
+					<button type="submit" form="mainContent" class="btn btn-primary" value="submit" style="width: 90%">Submit</button>
+				</div>
+				<div class="col-4 btn-group-toggle mt-5">
+					<button type="reset" class="btn btn-danger" onclick="unSelectAll()" style="width: 90%">Reset</button>
+				</div>
+				
+			</div>
+			<input type="hidden" name="next" value="{{ request.path }}">
+			{% endif %}
+		</form>
+	</div>
+	<script type="text/javascript">
+		function form_submit(test) {
+			console.log(test);
+			document.getElementById('competitionFormSubmit').click();
+		}
+	</script>
+</body>
+</html>
